@@ -10,9 +10,10 @@ from operator import itemgetter
 
 class Nrainhas:
     def __init__(self,n):
-        self.n = n
-        self.rainhas = [i for i in range(0,self.n)]
-
+        self.n = n # número de rainhas
+        self.rainhas = [i for i in range(0,self.n)] # cria um vetor com as rainhas
+    
+    #Cria um indivíduo ou uma solução inicial
     def GerarIndividuo(self):
         i = 0
         coluna = self.rainhas[:]
@@ -25,14 +26,15 @@ class Nrainhas:
             i += 1
         return individuo
 
-
+    # representação do Individuo em uma matriz, 1 - tem rainha, 0 - não tem
     def RepresentarIndividuo(self,individuo):
 
         representacao = np.zeros((self.n, self.n), dtype=np.int64)
         for i in range(0,len(individuo)):
             representacao[i][individuo[i]] = 1
         return representacao
-
+    
+    # verifica se a rainha é atacada na diagonal principal
     def buscaDiagPrincipal(self,RepresentacaoIndividuo,linha,coluna):
         res = False
         # O canto inferior direito e canto superior esquerdo não possui apenas a sua posição
@@ -41,7 +43,7 @@ class Nrainhas:
             return res
         else:
 
-            # Sobe ma diagonal principal
+            # Sobe na diagonal principal
             l,c = linha, coluna
             while l > 0 and c > 0:
                 l -= 1
@@ -50,7 +52,7 @@ class Nrainhas:
                     res = True
                     return res
 
-            # Desce ma diagonal principal
+            # Desce na diagonal principal
             l, c = linha, coluna
             while l < self.n - 1 and c < self.n-1:
                 l += 1
@@ -59,7 +61,8 @@ class Nrainhas:
                     res = True
                     return res
         return res
-
+    
+    # verifica se a rainha é atacada na diagonal secundária
     def buscaDiagSecundaria(self,RepresentacaoIndividuo,linha,coluna):
         res = False
         if (linha == 0 and coluna == 0) or (linha == self.n-1 and coluna == self.n-1):
@@ -67,7 +70,7 @@ class Nrainhas:
             return res
         else:
 
-            # Sobe na diagonal secundaria
+            # Sobe na diagonal secundária
             l,c = linha, coluna
 
             while l > 0 and c > self.n-1:
@@ -77,7 +80,7 @@ class Nrainhas:
                     res = True
                     return res
 
-            # Sobe na diagonal secundaria
+            # Sobe na diagonal secundária
             l, c = linha, coluna
             while l < self.n - 1 and c > 0:
                 l += 1
@@ -86,7 +89,8 @@ class Nrainhas:
                     res = True
                     return res
         return res
-
+    
+    # verifica se a rainha é atacada na linha 
     def buscaLinha(self,RepresentacaoIndividuo,linha,coluna):
         res = False
         i = 0
@@ -97,7 +101,8 @@ class Nrainhas:
                     return res
             i += 1
         return res
-
+    
+    # verifica se a rainha é atacada na coluna
     def buscaColuna(self,RepresentacaoIndividuo,linha,coluna):
         res = False
         i = 0
@@ -108,9 +113,15 @@ class Nrainhas:
                     return res
             i += 1
         return res
-
-    def fitnes(self,RepresentacaoIndividuo,individuo):
-        score = 0
+    
+    # Função de Avaliação de aptidão do Indivíduo  (Fitness)
+    def fitness(self,RepresentacaoIndividuo,individuo):
+        # Cada vez que a rainha é atacada, é somado um ponto no score
+        # para esta abordagem foi considerado que no pior caso, cada rainha pode sofrer 4 ataques
+        # sendo eles pelas diagonais principal e secundária, linhas e colunas.
+        # score máximo = n*4, onde n é o número de rainhas
+        # score mínimo = 0, neste caso é uma solução factível para o problema
+        score = 0 
         for i in range(0,len(individuo)):
             dp = Nrainhas.buscaDiagPrincipal(self,RepresentacaoIndividuo, i, individuo[i])
             ds = Nrainhas.buscaDiagSecundaria(self,RepresentacaoIndividuo, i, individuo[i])
@@ -126,6 +137,7 @@ class Nrainhas:
                 score += 1
         return score
 
+# Classe do Algoritmo Genético
 class AlgoritmoGenetico(Nrainhas):
 
     # Cria a População Inicial
@@ -142,7 +154,7 @@ class AlgoritmoGenetico(Nrainhas):
         populacaoOrdenada = []
         for i in range(0,len(Populacao)):
             RI = AlgoritmoGenetico.RepresentarIndividuo(self,Populacao[i])
-            avaliacaoIndividuo = AlgoritmoGenetico.fitnes(self,RI,Populacao[i])
+            avaliacaoIndividuo = AlgoritmoGenetico.fitness(self,RI,Populacao[i])
             Avaliacao.append([i, avaliacaoIndividuo])
 
         # ordenar as melhores solucoes: Elitismo
@@ -293,7 +305,8 @@ class AlgoritmoGenetico(Nrainhas):
     def Elitismo(self,populacao,n):
         Elistismo = populacao[0:n]
         return Elistismo
-
+    
+    # Algoritmo Genético
     def AG(self,TamPop=100,geracoes=100,K=3,pbcx=0.8,pbmut=0.5):
         # Cria a população
         Populacao = AlgoritmoGenetico.PopulacaoInicial(self,TamPop)
@@ -336,8 +349,12 @@ class AlgoritmoGenetico(Nrainhas):
         return individuo, fitness
 
 
-rainhas = AlgoritmoGenetico(60)
-ind,fit = rainhas.AG(100,1000,3,0.8,0.1)
-# imprime o resultado
+# Instância a classe do algoritmo genético
+n = 10 # Número de Rainhas
+rainhas = AlgoritmoGenetico(n)
+# Parametros do AG: AG(Tamanho_da_populacao, Num_Gerações, tamanho_Torneio, Prob_Cruzamento, Prob_mutação)
+ind,fit = rainhas.AG(100, 1000, 3, 0.8, 0.1)
+
+# Mostra o resultado
 for i in range(0,len(ind)):
     print(ind[i])
