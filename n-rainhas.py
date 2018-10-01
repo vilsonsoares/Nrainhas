@@ -1,10 +1,8 @@
-# Nrainhas
 #Problema das n.Rainhas com Algoritmos Genéticos
 #####################################################################
 # Autor: Vilson Soares de Siqueira                                  #
 # Data: 30/09/2018                                                  #
 #####################################################################
-
 
 import numpy as np
 import random
@@ -13,7 +11,6 @@ from operator import itemgetter
 class Nrainhas:
     def __init__(self,n):
         self.n = n
-        self.casas = [i for i in range(0,self.n)]
         self.rainhas = [i for i in range(0,self.n)]
 
     def GerarIndividuo(self):
