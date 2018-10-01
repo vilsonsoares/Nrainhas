@@ -177,25 +177,6 @@ class AlgoritmoGenetico(Nrainhas):
                 pais.append(vencedor)
         return pais
 
-    # Define o Crossover que será aplicado
-    def Crossover(self,populacao,pais, tam_pop, taxa_crossover = 0.7):
-
-        nova_pop = []
-        for i in range((tam_pop // 2)-1):
-
-            pai1 = random.choice(pais)
-            pai2 = random.choice(pais)
-
-            if random.random() < taxa_crossover:
-                filho1,filho2 = AlgoritmoGenetico.OperadorPMX(self,populacao[pai1],populacao[pai2])
-                nova_pop.append(filho1)
-                nova_pop.append(filho2)
-            else:
-                nova_pop.append(populacao[pai1])
-                nova_pop.append(populacao[pai2])
-
-        return nova_pop
-
     # Operador CX - Cycle Crossover. (OLIVER; SMITH; HOLLAND,1987)
     def OperadorCX(self, pai1, pai2):
 
@@ -278,7 +259,28 @@ class AlgoritmoGenetico(Nrainhas):
                             k2 += 1
 
             return filho1, filho2
+    
+    # Define o Crossover que será aplicado
+    def Crossover(self,populacao,pais, tam_pop, taxa_crossover = 0.7):
 
+        nova_pop = []
+        for i in range((tam_pop // 2)-1):
+
+            pai1 = random.choice(pais)
+            pai2 = random.choice(pais)
+
+            if random.random() < taxa_crossover:
+                # opções implementadas Operadores CX e PMX
+                #filho1,filho2 = AlgoritmoGenetico.OperadorCX(self,populacao[pai1],populacao[pai2])
+                filho1,filho2 = AlgoritmoGenetico.OperadorPMX(self,populacao[pai1],populacao[pai2])
+                nova_pop.append(filho1)
+                nova_pop.append(filho2)
+            else:
+                nova_pop.append(populacao[pai1])
+                nova_pop.append(populacao[pai2])
+
+        return nova_pop
+    # Mutação SWAP
     def Mutacao(self,novaPopulacao,pbmut = 0.05):
         # Aplica a Mutação dos individuos da população, se probabilidade defenida for True
         for m in range(2,len(novaPopulacao)):
@@ -289,39 +291,56 @@ class AlgoritmoGenetico(Nrainhas):
                 novaPopulacao[m][gene1], novaPopulacao[m][gene2] = novaPopulacao[m][gene2], novaPopulacao[m][gene1]
 
         return novaPopulacao
-
-    def Elitismo(self,populacao):
-        Elistismo = populacao[0:2]
+    
+    # Passar apenas os 2 melhores individuos para a próxima geração
+    def Elitismo(self,populacao,n):
+        Elistismo = populacao[0:n]
         return Elistismo
 
     def AG(self,TamPop=100,geracoes=100,K=3,pbcx=0.8,pbmut=0.5):
+        # Cria a população
         Populacao = AlgoritmoGenetico.PopulacaoInicial(self,TamPop)
+    
+        # avaliação dos indivíduos da População
         Avaliacao, PopulacaoOrdenada = AlgoritmoGenetico.AvaliacaoPopulacao(self,Populacao)
-        #Elitismo = AlgoritmoGenetico.Elitismo(self, PopulacaoOrdenada)
+        
         for i in range(geracoes):
             # seleção por torneio
             pais = AlgoritmoGenetico.selecaoTorneio(self,Avaliacao,K)
-
+            
+            # Aplica o Crossover e Mutação
             NPopulacao = AlgoritmoGenetico.Crossover(self, PopulacaoOrdenada, pais, TamPop, pbcx)
             NPopulacao = AlgoritmoGenetico.Mutacao(self, NPopulacao, pbmut)
-            #populacao = Elitismo + NPopulacao
-
-            populacao = PopulacaoOrdenada + NPopulacao
+            
+            # Retirar o comentário para usar o metódo de seleção para a próxima geração
+            
+            # Metódo Ranking, ordena e passa os melhores individuos para a próxima geração
+            # se usar está opção : definir a taxa de  mutação para (0.1 - 0.5)
+            #populacao = PopulacaoOrdenada + NPopulacao
+            
+            # Passa n melhores individuos para a próxima geração
+            # se usar está opção : definir a taxa de mutação para (0.05 - 0.1)
+            Elitismo = AlgoritmoGenetico.Elitismo(self, PopulacaoOrdenada,n=2)
+            populacao = Elitismo + NPopulacao
+            
+            # Avaliação da População que passará para a próxima geração
             Avaliacao, PopulacaoOrdenada = AlgoritmoGenetico.AvaliacaoPopulacao(self, populacao)
 
-            #Elitismo = AlgoritmoGenetico.Elitismo(self, PopulacaoOrdenada)
-            print('Geracao:',i + 1,'| Evolução -> Melhor:',Avaliacao[0][1], 'Pior: ',Avaliacao[-1][1])
+            print('Geracao:', i + 1, '| Evolução -> Melhor:', Avaliacao[0][1], 'Pior: ', Avaliacao[-1][1])
             if Avaliacao[0][1] == 0:
-                print("\n#### Criou uma solução na Geração: ",i + 1,'#########\n\n')
+                print("\n#### Criou uma solução na Geração: ", i + 1, '#########\n\n')
                 individuo, fitness = AlgoritmoGenetico.RepresentarIndividuo(self, PopulacaoOrdenada[0]), Avaliacao[1]
                 return individuo, fitness
 
-        #print(AlgoritmoGenetico.RepresentarIndividuo(self,PopulacaoOrdenada[0]))
+        individuo, fitness = AlgoritmoGenetico.RepresentarIndividuo(self, PopulacaoOrdenada[0]), Avaliacao[1]
+        return individuo, fitness
+
         individuo, fitness = AlgoritmoGenetico.RepresentarIndividuo(self, PopulacaoOrdenada[0]), Avaliacao[1]
         return individuo, fitness
 
 
 rainhas = AlgoritmoGenetico(60)
-ind,fit = rainhas.AG(100,1000,3,0.8,0.5)
+ind,fit = rainhas.AG(100,1000,3,0.8,0.1)
+# imprime o resultado
 for i in range(0,len(ind)):
     print(ind[i])
