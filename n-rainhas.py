@@ -1,4 +1,4 @@
-#Problema das n.Rainhas com Algoritmos Genéticos
+# Resolvendo o Problema das n.Rainhas com Algoritmo Genético
 #####################################################################
 # Autor: Vilson Soares de Siqueira                                  #
 # Data: 30/09/2018                                                  #
