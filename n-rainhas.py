@@ -1,5 +1,11 @@
 # Nrainhas
 #Problema das n.Rainhas com Algoritmos Genéticos
+#####################################################################
+# Autor: Vilson Soares de Siqueira                                  #
+# Data: 30/09/2018                                                  #
+#####################################################################
+
+
 import numpy as np
 import random
 from operator import itemgetter
